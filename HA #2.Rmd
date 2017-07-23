@@ -1,0 +1,70 @@
+---
+title: "Untitled"
+output: 
+  pdf_document: 
+    fig_height: 4
+---
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+
+Brief ouline of the solution:
+
+In my work I assumed that the only task is to predict index of industrial production and I am free to chose instruments. The only constraint is to use division of the time series into trend, cycle and error components. In my findings I found extreemly useful Holt-Winters model, which predicts cyclical data pretty well.  
+
+
+In my work i used several packages: "stats", "mFilter", "forecast", "TTR".
+In the beging of the work I upload packages
+
+```{r include=FALSE, echo = FALSE, warning=FALSE, results=FALSE}
+
+setwd("C:/Users/User/Downloads")
+#install.packages("stats")
+#install.packages("mFilter")
+#install.packages("forecast")
+#install.packages("TTR")
+library("stats")
+library("datasets")
+library("mFilter")
+library("forecast")
+library("TTR")
+
+tmp <- read.csv("prod_indx_train.csv")
+y <- ts(log(tmp), start = c(1959, 8), freq = 12)
+y <- y[,1]
+```
+
+
+
+```{r, warning=FALSE, echo = FALSE}
+stl.y <- stl(y, s.window="periodic", robust=FALSE)
+
+plot(stl.y)
+
+x <-auto.arima(stl.y$time.series[,"trend"])
+PredTrend <- forecast(x, h = 63)
+plot(stl.y$time.series[,"trend"])
+lines(PredTrend$mean, col = "red")
+
+model <- HoltWinters(stl.y$time.series[,"seasonal"],  )
+PredSeasonal <- forecast.HoltWinters(model, h = 63)
+plot(PredSeasonal)
+
+
+model2 <- HoltWinters(y)
+forecast2 <- forecast.HoltWinters(model2, h = 63)
+forecast <- PredSeasonal$mean + PredTrend$mean
+
+
+-1.126181e-03
+
+1.721022e-05
+
+plot(PredTrend)
+plot(forecast2)
+lines(forecast, col= "red")
+
+```
+
